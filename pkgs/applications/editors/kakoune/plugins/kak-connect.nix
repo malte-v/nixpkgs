@@ -13,11 +13,12 @@ stdenv.mkDerivation {
     patchShebangs bin
   '';
 
+  dontBuild = true;
+
   installPhase = ''
-    cp -r bin $out/bin
-    cp -r share $out/share
     mkdir -p $out/share/kak/autoload/plugins
     cp -r rc $out/share/kak/autoload/plugins/connect
+    cp -r bin $out/bin
   '';
 
   meta = with stdenv.lib;
