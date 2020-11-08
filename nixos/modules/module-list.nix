@@ -173,6 +173,7 @@
   ./programs/wavemon.nix
   ./programs/waybar.nix
   ./programs/wireshark.nix
+  ./programs/wshowkeys.nix
   ./programs/x2goserver.nix
   ./programs/xfs_quota.nix
   ./programs/xonsh.nix
@@ -295,8 +296,6 @@
   ./services/databases/postgresql.nix
   ./services/databases/redis.nix
   ./services/databases/riak.nix
-  ./services/databases/riak-cs.nix
-  ./services/databases/stanchion.nix
   ./services/databases/victoriametrics.nix
   ./services/databases/virtuoso.nix
   ./services/desktops/accountsservice.nix
@@ -393,6 +392,7 @@
   ./services/logging/logcheck.nix
   ./services/logging/logrotate.nix
   ./services/logging/logstash.nix
+  ./services/logging/promtail.nix
   ./services/logging/rsyslogd.nix
   ./services/logging/syslog-ng.nix
   ./services/logging/syslogd.nix
@@ -402,7 +402,6 @@
   ./services/mail/dovecot.nix
   ./services/mail/dspam.nix
   ./services/mail/exim.nix
-  ./services/mail/freepops.nix
   ./services/mail/mail.nix
   ./services/mail/mailcatcher.nix
   ./services/mail/mailhog.nix
@@ -681,6 +680,7 @@
   ./services/networking/murmur.nix
   ./services/networking/mxisd.nix
   ./services/networking/namecoind.nix
+  ./services/networking/nar-serve.nix
   ./services/networking/nat.nix
   ./services/networking/ndppd.nix
   ./services/networking/networkmanager.nix
@@ -864,6 +864,7 @@
   ./services/web-apps/ihatemoney
   ./services/web-apps/jirafeau.nix
   ./services/web-apps/jitsi-meet.nix
+  ./services/web-apps/keycloak.nix
   ./services/web-apps/limesurvey.nix
   ./services/web-apps/mattermost.nix
   ./services/web-apps/mediawiki.nix

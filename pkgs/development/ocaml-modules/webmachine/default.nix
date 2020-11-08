@@ -6,13 +6,14 @@
 buildDunePackage rec {
   pname = "webmachine";
   version = "0.6.2";
+  useDune2 = true;
 
   minimumOCamlVersion = "4.04";
 
   src = fetchFromGitHub {
     owner = "inhabitedtype";
     repo = "ocaml-webmachine";
-    rev = "${version}";
+    rev = version;
     sha256 = "1zi1vsm589y2njwzsqkmdbxvs9s4xlgbd62xqw2scp60mccp09nk";
   };
 

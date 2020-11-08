@@ -75,7 +75,7 @@ default-package-overrides:
   # haskell-language-server 0.5.0.0 doesn't accept newer versions
   - fourmolu ==0.2.*
   - refinery ==0.2.*
-  # LTS Haskell 16.19
+  # LTS Haskell 16.20
   - abstract-deque ==0.3
   - abstract-par ==0.3.3
   - AC-Angle ==1.0
@@ -91,7 +91,7 @@ default-package-overrides:
   - aeson-attoparsec ==0.0.0
   - aeson-better-errors ==0.9.1.0
   - aeson-casing ==0.2.0.0
-  - aeson-combinators ==0.0.3.0
+  - aeson-combinators ==0.0.4.0
   - aeson-compat ==0.3.9
   - aeson-default ==0.9.1.0
   - aeson-diff ==1.1.0.9
@@ -214,12 +214,12 @@ default-package-overrides:
   - annotated-wl-pprint ==0.7.0
   - ansi-terminal ==0.10.3
   - ansi-wl-pprint ==0.6.9
-  - antiope-core ==7.5.1
-  - antiope-dynamodb ==7.5.1
-  - antiope-messages ==7.5.1
-  - antiope-s3 ==7.5.1
-  - antiope-sns ==7.5.1
-  - antiope-sqs ==7.5.1
+  - antiope-core ==7.5.3
+  - antiope-dynamodb ==7.5.3
+  - antiope-messages ==7.5.3
+  - antiope-s3 ==7.5.3
+  - antiope-sns ==7.5.3
+  - antiope-sqs ==7.5.3
   - ANum ==0.2.0.2
   - apecs ==0.9.2
   - apecs-gloss ==0.2.4
@@ -814,7 +814,7 @@ default-package-overrides:
   - fmlist ==0.9.4
   - fmt ==0.6.1.2
   - fn ==0.3.0.2
-  - focus ==1.0.1.3
+  - focus ==1.0.1.4
   - focuslist ==0.1.0.2
   - foldable1 ==0.1.0.0
   - fold-debounce ==0.2.0.9
@@ -975,7 +975,7 @@ default-package-overrides:
   - hackage-db ==2.1.0
   - hackage-security ==0.6.0.1
   - haddock-library ==1.8.0
-  - hadolint ==1.18.0
+  - hadolint ==1.18.2
   - hadoop-streaming ==0.2.0.3
   - hakyll ==4.13.4.0
   - half ==0.3
@@ -1275,7 +1275,7 @@ default-package-overrides:
   - JuicyPixels-blurhash ==0.1.0.3
   - JuicyPixels-extra ==0.4.1
   - JuicyPixels-scale-dct ==0.1.2
-  - junit-xml ==0.1.0.1
+  - junit-xml ==0.1.0.2
   - justified-containers ==0.3.0.0
   - jwt ==0.10.0
   - kan-extensions ==5.2.1
@@ -1302,7 +1302,7 @@ default-package-overrides:
   - language-bash ==0.9.2
   - language-c ==0.8.3
   - language-c-quote ==0.12.2.1
-  - language-docker ==9.1.1
+  - language-docker ==9.1.2
   - language-haskell-extract ==0.2.4
   - language-java ==0.2.9
   - language-javascript ==0.7.1.0
@@ -1651,7 +1651,7 @@ default-package-overrides:
   - password-instances ==2.0.0.1
   - path ==0.7.0
   - path-extra ==0.2.0
-  - path-io ==1.6.1
+  - path-io ==1.6.2
   - path-pieces ==0.2.1
   - path-text-utf8 ==0.0.1.6
   - pathtype ==0.8.1.1
@@ -1818,7 +1818,7 @@ default-package-overrides:
   - range ==0.3.0.2
   - Ranged-sets ==0.4.0
   - range-set-list ==0.1.3.1
-  - rank1dynamic ==0.4.0
+  - rank1dynamic ==0.4.1
   - rank2classes ==1.3.2.1
   - Rasterific ==0.7.5.3
   - rasterific-svg ==0.3.3.2
@@ -2478,7 +2478,7 @@ default-package-overrides:
   - xdg-userdirs ==0.1.0.2
   - xeno ==0.4.2
   - xls ==0.1.3
-  - xlsx ==0.8.1
+  - xlsx ==0.8.2
   - xlsx-tabular ==0.2.2.1
   - xml ==1.3.14
   - xml-basic ==0.1.3.1
@@ -2507,7 +2507,7 @@ default-package-overrides:
   - yesod-auth-fb ==1.10.1
   - yesod-auth-hashdb ==1.7.1.2
   - yesod-bin ==1.6.0.6
-  - yesod-core ==1.6.18.4
+  - yesod-core ==1.6.18.5
   - yesod-fb ==0.6.1
   - yesod-form ==1.6.7
   - yesod-form-bootstrap4 ==3.0.0
@@ -2738,6 +2738,8 @@ unsupported-platforms:
   sdl2-mixer:                                   [ x86_64-darwin ]
   sdl2-ttf:                                     [ x86_64-darwin ]
   tokyotyrant-haskell:                          [ x86_64-darwin ]
+  vulkan:                                       [ i686-linux, armv7l-linux ]
+  VulkanMemoryAllocator:                        [ i686-linux, armv7l-linux ]
   Win32-console:                                [ i686-linux, x86_64-linux, x86_64-darwin ]
   Win32-dhcp-server:                            [ i686-linux, x86_64-linux, x86_64-darwin ]
   Win32-errors:                                 [ i686-linux, x86_64-linux, x86_64-darwin ]
@@ -2892,6 +2894,7 @@ broken-packages:
   - accentuateus
   - access-time
   - access-token-provider
+  - achille
   - acid-state-dist
   - acid-state-tls
   - ACME
@@ -3121,6 +3124,8 @@ broken-packages:
   - armor
   - arpa
   - arpack
+  - array-builder
+  - array-chunks
   - array-forth
   - array-list
   - array-primops
@@ -3205,7 +3210,6 @@ broken-packages:
   - authenticate-ldap
   - authinfo-hs
   - authoring
-  - autoapply
   - AutoForms
   - autom
   - automata
@@ -3456,6 +3460,7 @@ broken-packages:
   - bitcoin-hs
   - bitcoin-rpc
   - bitcoin-script
+  - bitcoin-scripting
   - bitcoin-tx
   - bitcoind-regtest
   - bitcoind-rpc
@@ -3601,7 +3606,11 @@ broken-packages:
   - byline
   - bytable
   - bytearray-parsing
+  - bytebuild
+  - bytehash
   - bytelog
+  - byteslice
+  - bytesmith
   - bytestring-arbitrary
   - bytestring-builder-varword
   - bytestring-class
@@ -3995,6 +4004,7 @@ broken-packages:
   - compdata-dags
   - compdata-param
   - compdoc
+  - compdoc-dhall-decoder
   - competition
   - compilation
   - complexity
@@ -4101,7 +4111,9 @@ broken-packages:
   - context-free-grammar
   - context-stack
   - ContextAlgebra
+  - contiguous
   - contiguous-checked
+  - contiguous-fft
   - continue
   - continuum
   - continuum-client
@@ -4535,6 +4547,7 @@ broken-packages:
   - discord-gateway
   - discord-haskell
   - discord-hs
+  - discord-register
   - discord-rest
   - discord-types
   - discordian-calendar
@@ -4600,6 +4613,9 @@ broken-packages:
   - doi
   - DOM
   - dom-lt
+  - domain
+  - domain-core
+  - domain-optics
   - domplate
   - dot-linker
   - dotfs
@@ -4799,6 +4815,7 @@ broken-packages:
   - eros
   - eros-client
   - eros-http
+  - error-codes
   - error-context
   - error-continuations
   - error-list
@@ -4856,7 +4873,6 @@ broken-packages:
   - every-bit-counts
   - ewe
   - exact-cover
-  - exact-real
   - exact-real-positional
   - except-exceptions
   - exception-monads-fd
@@ -5066,7 +5082,6 @@ broken-packages:
   - flamethrower
   - flamingra
   - flashblast
-  - flat
   - flat-maybe
   - flatbuffers
   - flay
@@ -5263,6 +5278,8 @@ broken-packages:
   - garepinoh
   - gargoyle
   - gargoyle-postgresql
+  - gargoyle-postgresql-connect
+  - gargoyle-postgresql-nix
   - gas
   - gbu
   - gc-monitoring-wai
@@ -5416,7 +5433,6 @@ broken-packages:
   - git-fmt
   - git-gpush
   - git-jump
-  - git-mediate
   - git-monitor
   - git-object
   - git-remote-ipfs
@@ -5519,6 +5535,7 @@ broken-packages:
   - GoogleSB
   - GoogleTranslate
   - gopherbot
+  - gopro-plus
   - gore-and-ash
   - gore-and-ash-actor
   - gore-and-ash-async
@@ -6159,6 +6176,7 @@ broken-packages:
   - hevolisa
   - hevolisa-dph
   - hex
+  - hex-text
   - HExcel
   - hexchat
   - hexif
@@ -6929,6 +6947,7 @@ broken-packages:
   - iostring
   - iothread
   - iotransaction
+  - ip
   - ip2location
   - ip2proxy
   - ipatch
@@ -7590,6 +7609,7 @@ broken-packages:
   - lxd-client
   - lye
   - Lykah
+  - lz4-bytes
   - lz4-conduit
   - lz4-frame-conduit
   - lzma-enumerator
@@ -7612,6 +7632,7 @@ broken-packages:
   - maclight
   - macos-corelibs
   - macosx-make-standalone
+  - macrm
   - madlang
   - mage
   - magic-tyfams
@@ -7827,6 +7848,7 @@ broken-packages:
   - mltool
   - mm2
   - mmsyn4
+  - mmsyn7h
   - mmtf
   - mmtl
   - mmtl-base
@@ -7929,8 +7951,10 @@ broken-packages:
   - morfette
   - morfeusz
   - morley
+  - morloc
   - morpheus-graphql-cli
   - morpheus-graphql-client
+  - morpheus-graphql-subscriptions
   - morphisms-functors
   - morphisms-functors-inventory
   - morphisms-objects
@@ -8381,7 +8405,6 @@ broken-packages:
   - optparse-applicative-simple
   - optparse-enum
   - optparse-helper
-  - orbits
   - orc
   - orchestrate
   - OrchestrateDB
@@ -8734,6 +8757,7 @@ broken-packages:
   - pointless-haskell
   - pointless-lenses
   - pointless-rewrite
+  - poke
   - pokemon-go-protobuf-types
   - poker-eval
   - pokitdok
@@ -8746,8 +8770,13 @@ broken-packages:
   - polydata-core
   - polynomial
   - polysemy-chronos
+  - polysemy-extra
+  - polysemy-fskvstore
   - polysemy-http
+  - polysemy-kvstore-jsonfile
+  - polysemy-methodology
   - polysemy-optics
+  - polysemy-path
   - polysemy-RandomFu
   - polysemy-resume
   - polysemy-test
@@ -8778,6 +8807,7 @@ broken-packages:
   - poseidon
   - poseidon-postgis
   - posix-acl
+  - posix-api
   - posix-realtime
   - posix-waitpid
   - posplyu
@@ -8856,10 +8886,15 @@ broken-packages:
   - primal
   - primal-memory
   - primes-type
+  - primitive-atomic
+  - primitive-containers
+  - primitive-extras
   - primitive-indexed
   - primitive-maybe
   - primitive-simd
+  - primitive-sort
   - primitive-stablename
+  - primitive-unlifted
   - PrimitiveArray-Pretty
   - primula-board
   - primula-bot
@@ -9185,6 +9220,7 @@ broken-packages:
   - reflex-dom-svg
   - reflex-dynamic-containers
   - reflex-fsnotify
+  - reflex-gadt-api
   - reflex-ghci
   - reflex-gloss
   - reflex-gloss-scene
@@ -9413,6 +9449,7 @@ broken-packages:
   - ruin
   - ruler
   - ruler-core
+  - run-st
   - rungekutta
   - runhs
   - runmany
@@ -9854,6 +9891,7 @@ broken-packages:
   - sme
   - smerdyakov
   - smiles
+  - smith
   - smith-cli
   - smith-client
   - Smooth
@@ -10118,6 +10156,7 @@ broken-packages:
   - stm-chunked-queues
   - stm-containers
   - stm-firehose
+  - stm-hamt
   - stm-promise
   - stm-stats
   - stm-supply
@@ -10328,6 +10367,7 @@ broken-packages:
   - tart
   - task
   - task-distribution
+  - taskell
   - TaskMonad
   - tasty-auto
   - tasty-bdd
@@ -10455,6 +10495,7 @@ broken-packages:
   - th-instances
   - th-kinds
   - th-kinds-fork
+  - th-lego
   - th-pprint
   - th-sccs
   - th-tc
@@ -10743,6 +10784,7 @@ broken-packages:
   - typescript-docs
   - typograffiti
   - tyro
+  - tz
   - u2f
   - uber
   - uberlast
@@ -10985,7 +11027,6 @@ broken-packages:
   - vty-menu
   - vty-ui
   - vty-ui-extras
-  - vulkan-utils
   - waargonaut
   - wacom-daemon
   - waddle
@@ -11115,6 +11156,7 @@ broken-packages:
   - windns
   - windowslive
   - winerror
+  - winery
   - winio
   - Wired
   - wires
@@ -11286,6 +11328,7 @@ broken-packages:
   - yaml-rpc
   - yaml-rpc-scotty
   - yaml-rpc-snap
+  - yaml-unscrambler
   - YamlReference
   - Yampa
   - yampa-canvas
