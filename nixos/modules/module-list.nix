@@ -1052,6 +1052,7 @@
   ./virtualisation/anbox.nix
   ./virtualisation/container-config.nix
   ./virtualisation/containers.nix
+  ./virtualisation/containers-next.nix
   ./virtualisation/nixos-containers.nix
   ./virtualisation/oci-containers.nix
   ./virtualisation/cri-o.nix
