@@ -9,12 +9,12 @@ import ./make-test-python.nix ({ pkgs, lib, ... }: {
       container0 = {
         nixpkgs = builtins.fetchTarball "https://github.com/Ma27/nixpkgs/archive/88661bfb6443d0269fbab35b773ca9b9d469d8ba.tar.gz";
       };
-      container1 = {
-        sharedNix = false;
-        config = { pkgs, ... }: {
-          environment.systemPackages = [ pkgs.hello ];
-        };
-      };
+      #container1 = {
+        #sharedNix = false;
+        #config = { pkgs, ... }: {
+          #environment.systemPackages = [ pkgs.hello ];
+        #};
+      #};
     };
     networking = {
       useNetworkd = true;
@@ -25,7 +25,7 @@ import ./make-test-python.nix ({ pkgs, lib, ... }: {
     programs.mtr.enable = true;
     environment.systemPackages = [ pkgs.tcpdump pkgs.tmux ];
     time.timeZone = "Europe/Berlin";
-    networking.firewall.allowedUDPPorts = [ 67 68 ];
+    networking.firewall.allowedUDPPorts = [ 67 68 546 547 ];
   };
 
   testScript = ''

@@ -2,12 +2,26 @@
 
 with lib;
 
+# TODO
+# * networking
+#   * slaac
+#   * static
+#   * zones (only slaac)
+#   * public prefix testen
+# * refactor/simplify
+# * general networking (imperative)
+# * DNS
+# * MACVLAN
+# * Isolation
+# * Migration
+# * rootfs
+
 let
   cfg = config.nixos.containers.instances;
 
   mkImage = name: config:
     { container = import "${config.nixpkgs}/nixos/lib/eval-config.nix" {
-        system = "x86_64-linux";
+        system = builtins.currentSystem;
         modules = [
           ({ pkgs, ... }: {
             boot.isContainer = true;
@@ -19,7 +33,7 @@ let
             };
           })
         ] ++ (config.config);
-        prefix = [ "nixos" "containers" name "config" ];
+        prefix = [ "nixos" "containers" "instances" name "config" ];
       };
       inherit config;
     };
@@ -35,7 +49,7 @@ let
     };
     networkConfig = {
       Private = true;
-      Zone = "nixos";
+      VirtualEthernet = "yes";
     };
   } (mkIf (!config.sharedNix) {
     extraDrvConfig = let
@@ -93,8 +107,41 @@ in {
   };
 
   config = mkIf (cfg != {}) {
+    services.radvd = {
+      enable = true;
+      config = ''
+        interface ${concatMapStringsSep " " (x: "ve-${x}") (attrNames cfg)} {
+          AdvSendAdvert on;
+          prefix ::/64 {
+            AdvOnLink on;
+            AdvAutonomous on;
+          };
+        };
+      '';
+    };
     systemd = {
+
+      network.networks."10-container-veth" = {
+        matchConfig = {
+          Name = "ve-*";
+          Driver = "veth";
+        };
+        networkConfig = {
+          LinkLocalAddressing = "yes";
+          DHCPServer = "yes";
+          IPMasquerade = "yes";
+          LLDP = "yes";
+          EmitLLDP = "customer-bridge";
+          IPv6AcceptRA = "no";
+        };
+        address = [
+          "0.0.0.0/28"
+          "::/64"
+        ];
+      };
+
       nspawn = mapAttrs (const mkContainer) images;
+      targets.machines.wants = map (x: "systemd-nspawn@${x}.service") ["container0"];
       services = listToAttrs (flip map (attrNames cfg) (container:
         nameValuePair "systemd-nspawn@${container}" {
           preStart = mkBefore ''
