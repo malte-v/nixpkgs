@@ -12,7 +12,8 @@ import ./make-test-python.nix ({ pkgs, lib, ... }: {
         };
       };
       container1 = {
-        #sharedNix = false;
+        sharedNix = false;
+        nixpkgs = ../..;
         zone = "foo";
         config = { pkgs, ... }: {
           environment.systemPackages = [ pkgs.hello ];

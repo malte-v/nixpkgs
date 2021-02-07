@@ -4,9 +4,7 @@ with lib;
 
 # TODO
 # * networking
-#   * slaac
 #   * static
-#   * zones (only slaac)
 #   * public prefix testen
 # * refactor/simplify
 # * general networking (imperative)
@@ -149,6 +147,7 @@ in {
     };
 
     instances = mkOption {
+      default = {};
       type = types.attrsOf (types.submodule {
         options = {
           sharedNix = mkOption {
@@ -198,7 +197,13 @@ in {
   };
 
   config = mkIf (cfg != {}) {
-    assertions = flip concatMap (attrValues config.nixos.containers.instances) (inst: [
+    assertions = [
+      { assertion = !config.boot.isContainer;
+        description = ''
+          Cannot start containers inside a container!
+        '';
+      }
+    ] ++ (flip concatMap (attrValues config.nixos.containers.instances) (inst: [
       { assertion = inst.zone != inst.network;
         message = ''
           It's not supported to set both `zone' and `network' to `null'!
@@ -209,7 +214,7 @@ in {
           No configuration found for zone `${inst.zone}'!
         '';
       }
-    ]);
+    ]));
 
     services.radvd = {
       enable = true;
