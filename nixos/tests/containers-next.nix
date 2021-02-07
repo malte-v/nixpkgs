@@ -8,13 +8,19 @@ import ./make-test-python.nix ({ pkgs, lib, ... }: {
     nixos.containers.instances = {
       container0 = {
         nixpkgs = builtins.fetchTarball "https://github.com/Ma27/nixpkgs/archive/88661bfb6443d0269fbab35b773ca9b9d469d8ba.tar.gz";
+        network = {
+        };
       };
-      #container1 = {
+      container1 = {
         #sharedNix = false;
-        #config = { pkgs, ... }: {
-          #environment.systemPackages = [ pkgs.hello ];
-        #};
-      #};
+        zone = "foo";
+        config = { pkgs, ... }: {
+          environment.systemPackages = [ pkgs.hello ];
+        };
+      };
+    };
+    nixos.containers.zones = {
+      foo = {};
     };
     networking = {
       useNetworkd = true;
