@@ -6,7 +6,7 @@ with lib;
 # * networking
 #   * static
 #   * public prefix testen
-# * refactor/simplify
+# * refactor/simplify, descriptions + better assertions
 # * general networking (imperative)
 # * DNS
 #   * DHCP setzt Records
@@ -44,6 +44,7 @@ let
     LinkLocalAddressing = "yes";
     DHCPServer = "yes";
     IPMasquerade = if nat then "yes" else "no";
+    IPForward = "yes";
     LLDP = "yes";
     EmitLLDP = "customer-bridge";
     IPv6AcceptRA = "no";
@@ -64,16 +65,24 @@ let
             <citerefentry><refentrytitle>systemd.network</refentrytitle><manvolnum>5</manvolnum>
             </citerefentry> will assign an ULA IPv6 or private IPv4 address from
             the address-pool of the given size to the interface.
+
+            Please note that NATv6 is currently not supported since <literal>IPMasquerade</literal>
+            doesn't support IPv6. If this is still needed, it's recommended to do it like this:
+
+            <screen>
+            <prompt># </prompt>ip6tables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+            </screen>
           '';
         };
+      } // (optionalAttrs (v == 4) {
         nat = mkOption {
-          default = v == 4;
+          default = true;
           type = types.bool;
           description = ''
             Whether to set-up a basic NAT to enable internet access for the nspawn containers.
           '';
         };
-      };
+      });
     in
       assert elem type [ "veth" "zone" ]; {
         v4 = mkIPOptions 4;
