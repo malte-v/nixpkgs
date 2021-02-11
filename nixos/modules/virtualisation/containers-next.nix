@@ -3,7 +3,6 @@
 with lib;
 
 # TODO
-# * refactor/simplify, descriptions + better assertions
 # * general networking (imperative)
 # * DNS
 #   * DHCP setzt Records
@@ -57,8 +56,8 @@ let
           default = [];
           type = types.listOf types.str;
           example = literalExample (
-            if v == 4 then [ "10.151.1.1/24" ]
-            else [ "fd23::/64" ]
+            if v == 4 then ''[ "10.151.1.1/24" ]''
+            else ''[ "fd23::/64" ]''
           );
           description = ''
             Address of the container on the host-side, i.e. the
@@ -69,8 +68,8 @@ let
           default = [];
           type = types.listOf types.str;
           example = literalExample (
-            if v == 4 then [ "10.151.1.2/24" ]
-            else [ "fd23::2/64" ]
+            if v == 4 then ''[ "10.151.1.2/24" ]''
+            else ''[ "fd23::2/64" ]''
           );
 
           description = ''
@@ -122,7 +121,7 @@ let
 
   mkImage = name: config:
     { container = import "${config.nixpkgs}/nixos/lib/eval-config.nix" {
-        system = builtins.currentSystem;
+        system = pkgs.system;
         modules = [
           ({ pkgs, ... }: {
             boot.isContainer = true;
@@ -144,15 +143,10 @@ let
                 EmitLLDP = "customer-bridge";
                 LinkLocalAddressing = "yes";
               };
-              address = mkIf (cfg.${name}.network != null)
-                (mkMerge [
-                  (mkIf (cfg.${name}.network.v4.static.containerPool != [])
-                    cfg.${name}.network.v4.static.containerPool
-                  )
-                  (mkIf (cfg.${name}.network.v6.static.containerPool != [])
-                    cfg.${name}.network.v6.static.containerPool
-                  )
-                ]);
+              address = mkIf (cfg.${name}.network != null) (
+                cfg.${name}.network.v4.static.containerPool
+                ++ cfg.${name}.network.v6.static.containerPool
+              );
             };
           })
         ] ++ (config.config);
@@ -204,7 +198,9 @@ in {
       });
       default = {};
       description = ''
-        Networking zones for nspawn containers.
+        Networking zones for nspawn containers. In this mode, the host-side
+        of the virtual ethernet of a machine is managed by an interface named
+        <literal>vz-&lt;name&gt;</literal>.
       '';
     };
 
@@ -216,15 +212,17 @@ in {
             default = true;
             type = types.bool;
             description = ''
-              NOTE: experimental setting! Expect things to break!
+              <warning>
+                <para>Experimental setting! Expect things to break!</para>
+              </warning>
 
-              With this option *disabled*, only the needed store-paths will
+              With this option <emphasis>disabled</emphasis>, only the needed store-paths will
               be mounted into the container rather than the entire store.
             '';
           };
 
           nixpkgs = mkOption {
-            default = <nixpkgs>;
+            default = pkgs.path;
             type = types.path;
             description = ''
               Path to the `nixpkgs`-checkout or channel to use for the container.
@@ -234,6 +232,11 @@ in {
           zone = mkOption {
             type = types.nullOr types.str;
             default = null;
+            description = ''
+              Name of the networking zone defined by <citerefentry>
+              <refentrytitle>systemd.nspawn</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
+              Please note that this is mutually exclusive with the <option>network</option>-option.
+            '';
           };
 
           network = mkOption {
@@ -244,11 +247,19 @@ in {
                 (mkStaticNetOpts 6);
             });
             default = null;
+            description = ''
+              Networking options for a single container. With this option used, a
+              <literal>veth</literal>-pair is created. It's possible to configure a dynamically
+              managed network with private IPv4 and ULA IPv6 the same way like zones.
+              Additionally, it's possible to statically assign addresses to a container here.
+            '';
           };
 
           config = mkOption {
             description = ''
-              NixOS configuration for the container.
+              NixOS configuration for the container. See <citerefentry>
+              <refentrytitle>configuration.nix</refentrytitle><manvolnum>5</manvolnum>
+              </citerefentry> for available options.
             '';
             default = {};
             type = mkOptionType {
@@ -258,6 +269,19 @@ in {
           };
         };
       });
+
+      description = ''
+        Attribute set to define <citerefentry><refentrytitle>systemd.nspawn</refentrytitle>
+        <manvolnum>5</manvolnum></citerefentry>-managed containers. With this attribute-set,
+        a network, a shared store and a NixOS configuration can be declared for each running
+        container.
+
+        The container's state is managed in <filename>/var/lib/machines/&lt;name&gt;</filename>.
+        A machine can be started with the
+        <filename>systemd-nspawn@&lt;name&gt;.service</filename>-unit, during runtime it can
+        be accessed with <citerefentry><refentrytitle>machinectl</refentrytitle>
+        <manvolnum>1</manvolnum></citerefentry>.
+      '';
     };
   };
 
