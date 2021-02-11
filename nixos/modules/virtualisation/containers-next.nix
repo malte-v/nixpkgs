@@ -3,9 +3,6 @@
 with lib;
 
 # TODO
-# * networking
-#   * static
-#   * public prefix testen
 # * refactor/simplify, descriptions + better assertions
 # * general networking (imperative)
 # * DNS
@@ -40,15 +37,49 @@ let
       Driver = if type == "veth" then "veth" else "bridge";
     };
 
-  mkNetworkCfg = nat: {
+  mkNetworkCfg = dhcp: nat: {
     LinkLocalAddressing = "yes";
-    DHCPServer = "yes";
+    DHCPServer = if dhcp then "yes" else "no";
     IPMasquerade = if nat then "yes" else "no";
     IPForward = "yes";
     LLDP = "yes";
     EmitLLDP = "customer-bridge";
     IPv6AcceptRA = "no";
   };
+
+  recUpdate3 = a: b: c:
+    recursiveUpdate a (recursiveUpdate b c);
+
+  mkStaticNetOpts = v:
+    assert elem v [ 4 6 ]; {
+      "v${toString v}".static = {
+        hostAddresses = mkOption {
+          default = [];
+          type = types.listOf types.str;
+          example = literalExample (
+            if v == 4 then [ "10.151.1.1/24" ]
+            else [ "fd23::/64" ]
+          );
+          description = ''
+            Address of the container on the host-side, i.e. the
+            subnet and address assigned to <literal>ve-&lt;name&gt;</literal>.
+          '';
+        };
+        containerPool = mkOption {
+          default = [];
+          type = types.listOf types.str;
+          example = literalExample (
+            if v == 4 then [ "10.151.1.2/24" ]
+            else [ "fd23::2/64" ]
+          );
+
+          description = ''
+            Addresses to be assigned to the container, i.e. the
+            subnet and address assigned to the <literal>host0</literal>-interface.
+          '';
+        };
+      };
+    };
 
   mkNetworkingOpts = type:
     let
@@ -100,6 +131,28 @@ let
               useHostResolvConf = false;
               useDHCP = false;
               useNetworkd = true;
+            };
+            systemd.network.networks."20-host0" = {
+              matchConfig = {
+                Virtualization = "container";
+                Name = "host0";
+              };
+              dhcpConfig.UseTimezone = "yes";
+              networkConfig = {
+                DHCP = "yes";
+                LLDP = "yes";
+                EmitLLDP = "customer-bridge";
+                LinkLocalAddressing = "yes";
+              };
+              address = mkIf (cfg.${name}.network != null)
+                (mkMerge [
+                  (mkIf (cfg.${name}.network.v4.static.containerPool != [])
+                    cfg.${name}.network.v4.static.containerPool
+                  )
+                  (mkIf (cfg.${name}.network.v6.static.containerPool != [])
+                    cfg.${name}.network.v6.static.containerPool
+                  )
+                ]);
             };
           })
         ] ++ (config.config);
@@ -185,7 +238,10 @@ in {
 
           network = mkOption {
             type = types.nullOr (types.submodule {
-              options = mkNetworkingOpts "veth";
+              options = recUpdate3
+                (mkNetworkingOpts "veth")
+                (mkStaticNetOpts 4)
+                (mkStaticNetOpts 6);
             });
             default = null;
           };
@@ -212,15 +268,17 @@ in {
           Cannot start containers inside a container!
         '';
       }
-    ] ++ (flip concatMap (attrValues config.nixos.containers.instances) (inst: [
-      { assertion = inst.zone != inst.network;
+    ] ++ (flip concatMap (attrNames config.nixos.containers.instances) (n: let inst = cfg.${n}; in [
+      { assertion = inst.zone == null && inst.network != null || inst.zone != null && inst.network == null;
         message = ''
-          It's not supported to set both `zone' and `network' to `null'!
+          The options `zone' and `network' are mutually exclusive!
+          (Invalid container: ${n})
         '';
       }
       { assertion = inst.zone != null -> (config.nixos.containers.zones != null && config.nixos.containers.zones ? ${inst.zone});
         message = ''
           No configuration found for zone `${inst.zone}'!
+          (Invalid container: ${n})
         '';
       }
     ]));
@@ -243,18 +301,23 @@ in {
 
     systemd = {
       network.networks = mkMerge
-        ((flip mapAttrsToList cfg (name: config: if config.network == null then {} else {
+        ((flip mapAttrsToList cfg (name: config: optionalAttrs (config.network != null) {
           "20-${ifacePrefix "veth"}-${name}" = {
             matchConfig = mkMatchCfg "veth" name;
-            address = config.network.v4.addrPool ++ config.network.v6.addrPool;
-            networkConfig = mkNetworkCfg config.network.v4.nat;
+            address = config.network.v4.addrPool
+              ++ config.network.v6.addrPool
+              ++ optionals (config.network.v4.static.hostAddresses != null)
+                config.network.v4.static.hostAddresses
+              ++ optionals (config.network.v6.static.hostAddresses != null)
+                config.network.v6.static.hostAddresses;
+            networkConfig = mkNetworkCfg (config.network.v4.addrPool != []) config.network.v4.nat;
           };
         }))
         ++ (flip mapAttrsToList config.nixos.containers.zones (name: zone: {
           "20-${ifacePrefix "zone"}-${name}" = {
             matchConfig = mkMatchCfg "zone" name;
             address = zone.v4.addrPool ++ zone.v6.addrPool;
-            networkConfig = mkNetworkCfg zone.v4.nat;
+            networkConfig = mkNetworkCfg true zone.v4.nat;
           };
         })));
 
