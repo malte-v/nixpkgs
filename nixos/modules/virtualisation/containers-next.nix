@@ -156,44 +156,47 @@ let
       inherit config;
     };
 
-  mkContainer = cfg: let inherit (cfg) container config; in mkMerge [{
-    execConfig = mkMerge [
-      {
-        Boot = false;
-        Parameters = "${container.config.system.build.toplevel}/init";
-        Ephemeral = yesNo config.ephemeral;
-      }
-      (mkIf (!config.ephemeral) {
-        LinkJournal = mkDefault "guest";
-      })
-    ];
-    filesConfig = mkIf config.sharedNix {
-      BindReadOnly = [ "/nix/store" "/nix/var/nix/db" "/nix/var/nix/daemon-socket" ];
-    };
-    networkConfig = mkMerge [
-      { Private = true;
-        VirtualEthernet = "yes";
-      }
-      (mkIf (config.zone != null) {
-        Zone = config.zone;
-      })
-    ];
-  } (mkIf (!config.sharedNix) {
-    extraDrvConfig = let
-      info = pkgs.closureInfo {
-        rootPaths = [ container.config.system.build.toplevel ];
+  mkContainer = cfg: let inherit (cfg) container config; in mkMerge [
+    {
+      execConfig = mkMerge [
+        {
+          Boot = false;
+          Parameters = "${container.config.system.build.toplevel}/init";
+          Ephemeral = yesNo config.ephemeral;
+        }
+        (mkIf (!config.ephemeral) {
+          LinkJournal = mkDefault "guest";
+        })
+      ];
+      filesConfig = mkIf config.sharedNix {
+        BindReadOnly = [ "/nix/store" "/nix/var/nix/db" "/nix/var/nix/daemon-socket" ];
       };
-    in pkgs.runCommand "bindmounts.nspawn" { }
-      ''
-        touch $out
-        echo "[Files]" > $out
+      networkConfig = mkMerge [
+        { Private = true;
+          VirtualEthernet = "yes";
+        }
+        (mkIf (config.zone != null) {
+          Zone = config.zone;
+        })
+      ];
+    }
+    (mkIf (!config.sharedNix) {
+      extraDrvConfig = let
+        info = pkgs.closureInfo {
+          rootPaths = [ container.config.system.build.toplevel ];
+        };
+      in pkgs.runCommand "bindmounts.nspawn" { }
+        ''
+          touch $out
+          echo "[Files]" > $out
 
-        cat ${info}/store-paths | while read line
-        do
-          echo "BindReadOnly=$line" >> $out
-        done
-      '';
-  })];
+          cat ${info}/store-paths | while read line
+          do
+            echo "BindReadOnly=$line" >> $out
+          done
+        '';
+    })
+  ];
 
   images = mapAttrs mkImage cfg;
 in {
