@@ -14,6 +14,7 @@ with lib;
 let
   cfg = config.nixos.containers.instances;
 
+  yesNo = x: if x then "yes" else "no";
   ifacePrefix = type: if type == "veth" then "ve" else "vz";
 
   mkRadvdSection = type: name: v6Pool:
@@ -38,8 +39,8 @@ let
 
   mkNetworkCfg = dhcp: nat: {
     LinkLocalAddressing = "yes";
-    DHCPServer = if dhcp then "yes" else "no";
-    IPMasquerade = if nat then "yes" else "no";
+    DHCPServer = yesNo dhcp;
+    IPMasquerade = yesNo nat;
     IPForward = "yes";
     LLDP = "yes";
     EmitLLDP = "customer-bridge";
@@ -156,11 +157,16 @@ let
     };
 
   mkContainer = cfg: let inherit (cfg) container config; in mkMerge [{
-    execConfig = {
-      Boot = false;
-      Parameters = "${container.config.system.build.toplevel}/init";
-      LinkJournal = "guest";
-    };
+    execConfig = mkMerge [
+      {
+        Boot = false;
+        Parameters = "${container.config.system.build.toplevel}/init";
+        Ephemeral = yesNo config.ephemeral;
+      }
+      (mkIf (!config.ephemeral) {
+        LinkJournal = mkDefault "guest";
+      })
+    ];
     filesConfig = mkIf config.sharedNix {
       BindReadOnly = [ "/nix/store" "/nix/var/nix/db" "/nix/var/nix/daemon-socket" ];
     };
@@ -218,6 +224,14 @@ in {
 
               With this option <emphasis>disabled</emphasis>, only the needed store-paths will
               be mounted into the container rather than the entire store.
+            '';
+          };
+
+          ephemeral = mkEnableOption "ephemeral container" // {
+            description = ''
+              <literal>ephemeral</literal> means that the container's rootfs will be wiped
+              before every startup. See <citerefentry><refentrytitle>systemd.nspawn</refentrytitle>
+              <manvolnum>5</manvolnum></citerefentry> for further context.
             '';
           };
 
