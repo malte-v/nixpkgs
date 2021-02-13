@@ -172,9 +172,10 @@ let
         BindReadOnly = [ "/nix/store" "/nix/var/nix/db" "/nix/var/nix/daemon-socket" ];
       };
       networkConfig = mkMerge [
-        { Private = true;
+        (mkIf (config.zone != null || config.network != null) {
+          Private = true;
           VirtualEthernet = "yes";
-        }
+        })
         (mkIf (config.zone != null) {
           Zone = config.zone;
         })
@@ -310,12 +311,6 @@ in {
         '';
       }
     ] ++ (flip concatMap (attrNames config.nixos.containers.instances) (n: let inst = cfg.${n}; in [
-      { assertion = inst.zone == null && inst.network != null || inst.zone != null && inst.network == null;
-        message = ''
-          The options `zone' and `network' are mutually exclusive!
-          (Invalid container: ${n})
-        '';
-      }
       { assertion = inst.zone != null -> (config.nixos.containers.zones != null && config.nixos.containers.zones ? ${inst.zone});
         message = ''
           No configuration found for zone `${inst.zone}'!
