@@ -17,6 +17,9 @@ let
   yesNo = x: if x then "yes" else "no";
   ifacePrefix = type: if type == "veth" then "ve" else "vz";
 
+  dynamicAddrsDisabled = inst:
+    inst.network == null || inst.network.v4.addrPool == [] && inst.network.v6.addrPool == [];
+
   mkRadvdSection = type: name: v6Pool:
     assert elem type [ "veth" "zone" ];
     ''
@@ -253,7 +256,6 @@ in {
             description = ''
               Name of the networking zone defined by <citerefentry>
               <refentrytitle>systemd.nspawn</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
-              Please note that this is mutually exclusive with the <option>network</option>-option.
             '';
           };
 
@@ -299,6 +301,10 @@ in {
         <filename>systemd-nspawn@&lt;name&gt;.service</filename>-unit, during runtime it can
         be accessed with <citerefentry><refentrytitle>machinectl</refentrytitle>
         <manvolnum>1</manvolnum></citerefentry>.
+
+        Please note that if both <xref linkend="opt-nixos.containers.instances._name_.network" />
+        &amp; <xref linkend="opt-nixos.containers.instances._name_.zone" /> are
+        <literal>null</literal>, the container will use the host's network.
       '';
     };
   };
@@ -317,6 +323,12 @@ in {
           (Invalid container: ${n})
         '';
       }
+      { assertion = inst.zone != null -> dynamicAddrsDisabled inst;
+        message = ''
+          Cannot assign additional generic address-pool to a veth-pair if corresponding
+          container `${n}' already uses zone `${inst.zone}'!
+        '';
+      }
     ]));
 
     services.radvd = {
@@ -325,7 +337,7 @@ in {
         ${concatMapStrings
           (x: mkRadvdSection "veth" x cfg.${x}.network.v6.addrPool)
           (filter
-            (n: cfg.${n}.network != null)
+            (n: cfg.${n}.network != null && cfg.${n}.zone == null)
             (attrNames cfg))
         }
         ${concatMapStrings
@@ -337,7 +349,7 @@ in {
 
     systemd = {
       network.networks = mkMerge
-        ((flip mapAttrsToList cfg (name: config: optionalAttrs (config.network != null) {
+        ((flip mapAttrsToList cfg (name: config: optionalAttrs (config.network != null && config.zone == null) {
           "20-${ifacePrefix "veth"}-${name}" = {
             matchConfig = mkMatchCfg "veth" name;
             address = config.network.v4.addrPool
@@ -352,7 +364,12 @@ in {
         ++ (flip mapAttrsToList config.nixos.containers.zones (name: zone: {
           "20-${ifacePrefix "zone"}-${name}" = {
             matchConfig = mkMatchCfg "zone" name;
-            address = zone.v4.addrPool ++ zone.v6.addrPool;
+            address = zone.v4.addrPool
+              ++ zone.v6.addrPool
+              ++ (flatten (flip mapAttrsToList cfg
+                (name: config: optionals (config.zone != null && config.network != null)
+                  (config.network.v4.static.hostAddresses ++ config.network.v6.static.hostAddresses)
+                )));
             networkConfig = mkNetworkCfg true zone.v4.nat;
           };
         })));
