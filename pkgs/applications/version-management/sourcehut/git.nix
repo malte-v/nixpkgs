@@ -1,9 +1,20 @@
-{ lib, fetchgit, buildPythonPackage
+{ lib
+, fetchgit
+, buildPythonPackage
 , buildGoModule
-, srht, minio, pygit2, scmsrht }:
-
+, python
+, srht
+, pygit2
+, scmsrht
+}:
 let
-  version = "0.61.10";
+  version = "0.72.8";
+  src = fetchgit {
+    url = "https://git.sr.ht/~sircmpwn/git.sr.ht";
+    rev = version;
+    sha256 = "1ms4l4adcj86vippyarr5gm4qcdqvzj3inwplifgpr6fm36sw780";
+  };
+
 
   buildShell = src: buildGoModule {
     inherit src version;
@@ -29,32 +40,24 @@ let
     vendorSha256 = "0fwzqpjv8x5y3w3bfjd0x0cvqjjak23m0zj88hf32jpw49xmjkih";
   };
 
-  buildAPI = src: buildGoModule {
-    inherit src version;
-    pname = "gitsrht-api";
-    vendorSha256 = "0d6kmsbsgj2q5nddx4w675zbsiarffj9vqplwvqk7dwz4id2wnif";
-  };
-in buildPythonPackage rec {
-  pname = "gitsrht";
-  inherit version;
+  updateHook = buildUpdateHook "${src}/gitsrht-update-hook";
 
-  src = fetchgit {
-    url = "https://git.sr.ht/~sircmpwn/git.sr.ht";
-    rev = version;
-    sha256 = "0g7aj5wlns0m3kf2aajqjjb5fwk5vbb8frrkdfp4118235h3xcqy";
-  };
+in
+buildPythonPackage rec {
+  inherit src version;
+  pname = "gitsrht";
 
   nativeBuildInputs = srht.nativeBuildInputs;
 
   propagatedBuildInputs = [
     srht
-    minio
     pygit2
     scmsrht
   ];
 
   preBuild = ''
     export PKGVER=${version}
+    export SRHT_PATH=${srht}/${python.sitePackages}/srht
   '';
 
   postInstall = ''
@@ -62,11 +65,11 @@ in buildPythonPackage rec {
     cp ${buildShell "${src}/gitsrht-shell"}/bin/gitsrht-shell $out/bin/gitsrht-shell
     cp ${buildDispatcher "${src}/gitsrht-dispatch"}/bin/gitsrht-dispatch $out/bin/gitsrht-dispatch
     cp ${buildKeys "${src}/gitsrht-keys"}/bin/gitsrht-keys $out/bin/gitsrht-keys
-    cp ${buildUpdateHook "${src}/gitsrht-update-hook"}/bin/gitsrht-update-hook $out/bin/gitsrht-update-hook
-    cp ${buildAPI "${src}/api"}/bin/api $out/bin/gitsrht-api
+    cp ${updateHook}/bin/gitsrht-update-hook $out/bin/gitsrht-update-hook
   '';
-
-  dontUseSetuptoolsCheck = true;
+  passthru = {
+    inherit updateHook;
+  };
 
   meta = with lib; {
     homepage = "https://git.sr.ht/~sircmpwn/git.sr.ht";

@@ -1,14 +1,20 @@
-{ lib, fetchgit, buildPythonPackage
-, srht, pyyaml, PyGithub }:
+{ lib
+, fetchgit
+, buildPythonPackage
+, srht
+, pyyaml
+, PyGithub
+, python
+}:
 
 buildPythonPackage rec {
   pname = "dispatchsrht";
-  version = "0.14.9";
+  version = "0.15.5";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/dispatch.sr.ht";
     rev = version;
-    sha256 = "JUffuJTKY4I8CrJc8tJWL+CbJCZtiqtUSO9SgYoeux0=";
+    sha256 = "10jf85yqwsq3259y1phc4ldqhq6qppxj78xpyw4jhsb7mxsv4ky0";
   };
 
   nativeBuildInputs = srht.nativeBuildInputs;
@@ -21,9 +27,8 @@ buildPythonPackage rec {
 
   preBuild = ''
     export PKGVER=${version}
+    export SRHT_PATH=${srht}/${python.sitePackages}/srht
   '';
-
-  dontUseSetuptoolsCheck = true;
 
   meta = with lib; {
     homepage = "https://dispatch.sr.ht/~sircmpwn/dispatch.sr.ht";

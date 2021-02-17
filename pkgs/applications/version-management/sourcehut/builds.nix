@@ -1,9 +1,17 @@
-{ lib, fetchgit, buildPythonPackage
+{ lib
+, fetchgit
+, buildPythonPackage
 , buildGoModule
-, srht, redis, celery, pyyaml, markdown }:
-
+, srht
+, redis
+, celery
+, pyyaml
+, markdown
+, ansi2html
+, python
+}:
 let
-  version = "0.63.4";
+  version = "0.64.8";
 
   buildWorker = src: buildGoModule {
     inherit src version;
@@ -11,14 +19,15 @@ let
 
     vendorSha256 = "1sbcjp93gb0c4p7dd1gjhmhwr1pygxvrrzp954j2fvxvi38w6571";
   };
-in buildPythonPackage rec {
+in
+buildPythonPackage rec {
   inherit version;
   pname = "buildsrht";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/builds.sr.ht";
     rev = version;
-    sha256 = "1w3rb685nqg2h0k3ag681svc400si9r1gy0sdim3wa2qh8glbqni";
+    sha256 = "1wd9hn6ziz7xl3yfzby8pr2jhmnzxggmwr7iyvx508whkshal4sa";
   };
 
   nativeBuildInputs = srht.nativeBuildInputs;
@@ -29,10 +38,12 @@ in buildPythonPackage rec {
     celery
     pyyaml
     markdown
+    ansi2html
   ];
 
   preBuild = ''
     export PKGVER=${version}
+    export SRHT_PATH=${srht}/${python.sitePackages}/srht
   '';
 
   postInstall = ''
@@ -43,8 +54,6 @@ in buildPythonPackage rec {
     cp contrib/submit_image_build $out/bin/builds.sr.ht
     cp ${buildWorker "${src}/worker"}/bin/worker $out/bin/builds.sr.ht-worker
   '';
-
-  dontUseSetuptoolsCheck = true;
 
   meta = with lib; {
     homepage = "https://git.sr.ht/~sircmpwn/builds.sr.ht";

@@ -1,15 +1,21 @@
-{ lib, fetchgit, buildPythonPackage
-, srht, redis, pyyaml, buildsrht
-, writeText }:
+{ lib
+, fetchgit
+, buildPythonPackage
+, srht
+, redis
+, pyyaml
+, buildsrht
+, writeText
+}:
 
 buildPythonPackage rec {
   pname = "scmsrht";
-  version = "0.22.4";
+  version = "0.22.8";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/scm.sr.ht";
     rev = version;
-    sha256 = "1djyrwa44wml9lj3njy6qbxyc3g1msswbh0y9jyjzxh2c02bl3jn";
+    sha256 = "08j6z5q7s54xwvv134q7jipj7dixrk3wn6wklc4aq5sq07yaxq5i";
   };
 
   nativeBuildInputs = srht.nativeBuildInputs;

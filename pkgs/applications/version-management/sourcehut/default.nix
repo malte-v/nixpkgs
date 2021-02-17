@@ -1,10 +1,12 @@
-{ python38, openssl
-, callPackage, recurseIntoAttrs }:
+{ python38
+, openssl
+, callPackage
+, recurseIntoAttrs
+}:
 
 # To expose the *srht modules, they have to be a python module so we use `buildPythonModule`
 # Then we expose them through all-packages.nix as an application through `toPythonApplication`
 # https://github.com/NixOS/nixpkgs/pull/54425#discussion_r250688781
-
 let
   fetchNodeModules = callPackage ./fetchNodeModules.nix { };
 
@@ -26,7 +28,8 @@ let
       scmsrht = self.callPackage ./scm.nix { };
     };
   };
-in with python.pkgs; recurseIntoAttrs {
+in
+with python.pkgs; recurseIntoAttrs {
   inherit python;
   buildsrht = toPythonApplication buildsrht;
   dispatchsrht = toPythonApplication dispatchsrht;
