@@ -253,6 +253,25 @@ in {
             '';
           };
 
+          activation = {
+            strategy = mkOption {
+              type = types.enum [ "none" "reload" "restart" ];
+              default = "none";
+              description = ''
+                Decide whether to <emphasis>restart</emphasis> or <emphasis>reload</emphasis>
+                the container during activation.
+              '';
+            };
+
+            reloadScript = mkOption {
+              default = null;
+              type = types.nullOr types.path;
+              description = ''
+                Script to run when a container is supposed to be reloaded.
+              '';
+            };
+          };
+
           network = mkOption {
             type = types.nullOr (types.submodule {
               options = recUpdate3
@@ -424,11 +443,30 @@ in {
       nspawn = mapAttrs (const mkContainer) images;
       targets.machines.wants = map (x: "systemd-nspawn@${x}.service") (attrNames cfg);
       services = listToAttrs (flip map (attrNames cfg) (container:
-        nameValuePair "systemd-nspawn@${container}" {
+        let
+          inherit (cfg.${container}) activation;
+          reloadProp =
+            if activation.strategy == "none"
+              then null
+            else if activation.strategy == "reload"
+              then "reloadIfChanged"
+            else "restartIfChanged";
+        in nameValuePair "systemd-nspawn@${container}" {
           preStart = mkBefore ''
             mkdir -p /var/lib/machines/${container}/{etc,var}
             touch /var/lib/machines/${container}/etc/{os-release,machine-id} || true
           '';
+
+          ${reloadProp} = true;
+
+          serviceConfig = mkIf (activation.strategy == "reload") {
+            ExecReload = if activation.reloadScript != null
+              then "${activation.reloadScript}"
+              else "${pkgs.writeShellScriptBin "activate" ''
+                systemd-run --machine ${container} --pty --quiet -- /bin/sh --login -c \
+                  '${images.${container}.container.config.system.build.toplevel}/bin/switch-to-configuration test'
+              ''}/bin/activate";
+          };
         }
       ));
     };
