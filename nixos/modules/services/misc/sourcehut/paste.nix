@@ -80,7 +80,7 @@ in
       services = {
         pastesrht = import ./service.nix { inherit config pkgs lib; } scfg drv iniKey {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "paste.sr.ht website service";
@@ -90,7 +90,7 @@ in
 
         pastesrht-webhooks = {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "paste.sr.ht webhooks service";
@@ -122,11 +122,16 @@ in
       "paste.sr.ht".webhooks = mkDefault "redis://${rcfg.bind}:${toString rcfg.port}/5";
     };
 
-    services.nginx.virtualHosts."paste.${cfg.originBase}" = {
-      forceSSL = true;
-      locations."/".proxyPass = "http://${cfg.address}:${toString port}";
-      locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
-      locations."/static".root = "${pkgs.sourcehut.pastesrht}/${pkgs.sourcehut.python.sitePackages}/pastesrht";
+    services.nginx.virtualHosts = with builtins; let
+      address = elemAt (builtins.split "://" cfg.settings."paste.sr.ht".origin) 2;
+    in
+    {
+      "${address}" = {
+        forceSSL = true;
+        locations."/".proxyPass = "http://${cfg.address}:${toString port}";
+        locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
+        locations."/static".root = "${pkgs.sourcehut.pastesrht}/${pkgs.sourcehut.python.sitePackages}/pastesrht";
+      };
     };
   };
 }

@@ -18,18 +18,18 @@
 , python
 }:
 let
-  version = "0.53.6";
+  version = "0.53.14";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/meta.sr.ht";
     rev = version;
-    sha256 = "0rx6gk6d21cfsmf6yg2qzj4hbfjchdjw8iyyigg13cghgi05hksx";
+    sha256 = "sha256-/+r/XLDkcSTW647xPMh5bcJmR2xZNNH74AJ5jemna2k=";
   };
 
   buildApi = src: buildGoModule {
     inherit src version;
     pname = "metasrht-api";
-    vendorSha256 = "11avngd311nr6432hb4db9y1kfppkqi220mgfdpmmkzn5pm59avp";
+    vendorSha256 = "sha256-eZyDrr2VcNMxI++18qUy7LA1Q1YDlWCoRtl00L8lfR4=";
   };
 
 in

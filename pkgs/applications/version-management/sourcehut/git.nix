@@ -12,20 +12,20 @@ let
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/git.sr.ht";
     rev = version;
-    sha256 = "1ms4l4adcj86vippyarr5gm4qcdqvzj3inwplifgpr6fm36sw780";
+    sha256 = "sha256-AB2uzajO5PtcpJfbOOTfuDFM6is5K39v3AZJ1hShRNc=";
   };
 
 
   buildShell = src: buildGoModule {
     inherit src version;
     pname = "gitsrht-shell";
-    vendorSha256 = "1abyv2s5l3bs0iylpgyj3jri2hh1iy8fiadxm7g6l2vl58h0b9ba";
+    vendorSha256 = "sha256-aqUFICp0C2reqb2p6JCPAUIRsxzSv0t9BHoNWrTYfqk=";
   };
 
   buildDispatcher = src: buildGoModule {
     inherit src version;
     pname = "gitsrht-dispatcher";
-    vendorSha256 = "1lzkf13m54pq0gnn3bcxc80nfg76hgck4l8q8jpaicrsiwgcyrd9";
+    vendorSha256 = "sha256-qWXPHo86s6iuRBhRMtmD5jxnAWKdrWHtA/iSUkdw89M=";
   };
 
   buildKeys = src: buildGoModule {

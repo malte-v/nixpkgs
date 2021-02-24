@@ -11,13 +11,13 @@
 , python
 }:
 let
-  version = "0.64.8";
+  version = "0.66.1";
 
   buildWorker = src: buildGoModule {
     inherit src version;
     pname = "builds-sr-ht-worker";
 
-    vendorSha256 = "1sbcjp93gb0c4p7dd1gjhmhwr1pygxvrrzp954j2fvxvi38w6571";
+    vendorSha256 = "sha256-giOaldV46aBqXyFH/cQVsbUr6Rb4VMhbBO86o48tRZY=";
   };
 in
 buildPythonPackage rec {
@@ -27,7 +27,7 @@ buildPythonPackage rec {
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/builds.sr.ht";
     rev = version;
-    sha256 = "1wd9hn6ziz7xl3yfzby8pr2jhmnzxggmwr7iyvx508whkshal4sa";
+    sha256 = "sha256-g8YULtfnqYEHOOIcMWcwU/m36mqTJJOucoZ7azx7CBs=";
   };
 
   nativeBuildInputs = srht.nativeBuildInputs;

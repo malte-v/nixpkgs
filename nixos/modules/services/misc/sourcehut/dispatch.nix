@@ -79,7 +79,7 @@ in
 
       services.dispatchsrht = import ./service.nix { inherit config pkgs lib; } scfg drv iniKey {
         after = [ "postgresql.service" "network.target" ];
-        requires = [ "postgresql.service" ];
+        bindsTo = [ "postgresql.service" ];
         wantedBy = [ "multi-user.target" ];
 
         description = "dispatch.sr.ht website service";
@@ -114,11 +114,16 @@ in
       # "dispatch.sr.ht::gitlab"."gitlab.com" = mkDefault "GitLab:application id:secret";
     };
 
-    services.nginx.virtualHosts."dispatch.${cfg.originBase}" = {
-      forceSSL = true;
-      locations."/".proxyPass = "http://${cfg.address}:${toString port}";
-      locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
-      locations."/static".root = "${pkgs.sourcehut.dispatchsrht}/${pkgs.sourcehut.python.sitePackages}/dispatchsrht";
+    services.nginx.virtualHosts = with builtins; let
+      address = elemAt (builtins.split "://" cfg.settings."dispatch.sr.ht".origin) 2;
+    in
+    {
+      "${address}" = {
+        forceSSL = true;
+        locations."/".proxyPass = "http://${cfg.address}:${toString port}";
+        locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
+        locations."/static".root = "${pkgs.sourcehut.dispatchsrht}/${pkgs.sourcehut.python.sitePackages}/dispatchsrht";
+      };
     };
   };
 }

@@ -117,7 +117,7 @@ in
 
       services.hgsrht = import ./service.nix { inherit config pkgs lib; } scfg drv iniKey {
         after = [ "redis.service" "postgresql.service" "network.target" ];
-        requires = [ "redis.service" "postgresql.service" ];
+        bindsTo = [ "redis.service" "postgresql.service" ];
         wantedBy = [ "multi-user.target" ];
 
         path = [ pkgs.mercurial ];
@@ -163,11 +163,16 @@ in
     };
 
     # TODO: requires testing and addition of hg-specific requirements
-    services.nginx.virtualHosts."hg.${cfg.originBase}" = {
-      forceSSL = true;
-      locations."/".proxyPass = "http://${cfg.address}:${toString port}";
-      locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
-      locations."/static".root = "${pkgs.sourcehut.hgsrht}/${pkgs.sourcehut.python.sitePackages}/hgsrht";
+    services.nginx.virtualHosts = with builtins; let
+      address = elemAt (builtins.split "://" cfg.settings."hg.sr.ht".origin) 2;
+    in
+    {
+      "${address}" = {
+        forceSSL = true;
+        locations."/".proxyPass = "http://${cfg.address}:${toString port}";
+        locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
+        locations."/static".root = "${pkgs.sourcehut.hgsrht}/${pkgs.sourcehut.python.sitePackages}/hgsrht";
+      };
     };
   };
 }

@@ -12,12 +12,12 @@
 
 buildPythonPackage rec {
   pname = "listssrht";
-  version = "0.48.16";
+  version = "0.48.19";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/lists.sr.ht";
     rev = version;
-    sha256 = "0irl5jhqi0wsd43h41yf5j94jxv24q747sqnzz716vjqxhs2v796";
+    sha256 = "sha256-bsakEMyvWaxiE4/SGcAP4mlGG9jkdHfFxpt9H+TJn/8=";
   };
 
   nativeBuildInputs = srht.nativeBuildInputs;

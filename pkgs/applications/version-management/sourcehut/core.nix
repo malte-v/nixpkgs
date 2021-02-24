@@ -29,18 +29,18 @@
 
 buildPythonPackage rec {
   pname = "srht";
-  version = "0.66.19";
+  version = "0.67.0";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/core.sr.ht";
     rev = version;
-    sha256 = "1vpw8acf358aljzhr3xvvc8616c8rvckk2d31b90ngkjzn69r5p0";
+    sha256 = "sha256-dS3Vjkdku2o2UX7R2AIOndLGNHCbkTkz2Zpxb0NXhDo=";
   };
 
   node_modules = fetchNodeModules {
     src = "${src}/srht";
     nodejs = nodejs;
-    sha256 = "0gwa2xb75g7fclrsr7r131kj8ri5gmhd96yw1iws5pmgsn2rlqi1";
+    sha256 = "sha256-IWKahdWv3qJ5DNyb1GB9JWYkZxghn6wzZe68clYXij8=";
   };
 
   patches = [

@@ -12,12 +12,12 @@
 
 buildPythonPackage rec {
   pname = "todosrht";
-  version = "0.63.12";
+  version = "0.64.13";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/todo.sr.ht";
     rev = version;
-    sha256 = "1jlvx766wwf7k9jf79jr6psmjl0pm9064snaf2q6703imfjjak6m";
+    sha256 = "sha256-rOo4/8JoYUMCLLm1ALpVVsoO7Ctbir9n4BQOn6pRHwQ=";
   };
 
   nativeBuildInputs = srht.nativeBuildInputs;

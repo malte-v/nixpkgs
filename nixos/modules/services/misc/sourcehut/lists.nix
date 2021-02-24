@@ -83,7 +83,7 @@ in
       services = {
         listssrht = import ./service.nix { inherit config pkgs lib; } scfg drv iniKey {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "lists.sr.ht website service";
@@ -93,7 +93,7 @@ in
 
         listssrht-process = {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "lists.sr.ht process service";
@@ -107,7 +107,7 @@ in
 
         listssrht-lmtp = {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "lists.sr.ht process service";
@@ -122,7 +122,7 @@ in
 
         listssrht-webhooks = {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "lists.sr.ht webhooks service";
@@ -175,11 +175,16 @@ in
 
     };
 
-    services.nginx.virtualHosts."lists.${cfg.originBase}" = {
-      forceSSL = true;
-      locations."/".proxyPass = "http://${cfg.address}:${toString port}";
-      locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
-      locations."/static".root = "${pkgs.sourcehut.listssrht}/${pkgs.sourcehut.python.sitePackages}/listssrht";
+    services.nginx.virtualHosts = with builtins; let
+      address = elemAt (builtins.split "://" cfg.settings."lists.sr.ht".origin) 2;
+    in
+    {
+      "${address}" = {
+        forceSSL = true;
+        locations."/".proxyPass = "http://${cfg.address}:${toString port}";
+        locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
+        locations."/static".root = "${pkgs.sourcehut.listssrht}/${pkgs.sourcehut.python.sitePackages}/listssrht";
+      };
     };
   };
 }

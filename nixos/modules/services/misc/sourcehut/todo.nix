@@ -79,7 +79,7 @@ in
       services = {
         todosrht = import ./service.nix { inherit config pkgs lib; } scfg drv iniKey {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "todo.sr.ht website service";
@@ -89,7 +89,7 @@ in
 
         todosrht-webhooks = {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "todo.sr.ht webhooks service";
@@ -135,11 +135,16 @@ in
       "todo.sr.ht::mail".posting-domain = mkDefault "todo.${cfg.originBase}";
     };
 
-    services.nginx.virtualHosts."todo.${cfg.originBase}" = {
-      forceSSL = true;
-      locations."/".proxyPass = "http://${cfg.address}:${toString port}";
-      locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
-      locations."/static".root = "${pkgs.sourcehut.todosrht}/${pkgs.sourcehut.python.sitePackages}/todosrht";
+    services.nginx.virtualHosts = with builtins; let
+      address = elemAt (builtins.split "://" cfg.settings."todo.sr.ht".origin) 2;
+    in
+    {
+      "${address}" = {
+        forceSSL = true;
+        locations."/".proxyPass = "http://${cfg.address}:${toString port}";
+        locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
+        locations."/static".root = "${pkgs.sourcehut.todosrht}/${pkgs.sourcehut.python.sitePackages}/todosrht";
+      };
     };
   };
 }

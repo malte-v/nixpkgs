@@ -56,14 +56,14 @@ in
 
     users = {
       users = {
-        "${user}" = {
+        ${user} = {
           group = user;
           description = "meta.sr.ht user";
         };
       };
 
       groups = {
-        "${user}" = { };
+        ${user} = { };
       };
     };
 
@@ -89,7 +89,7 @@ in
       services = {
         metasrht = import ./service.nix { inherit config pkgs lib; } scfg drv iniKey {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "meta.sr.ht website service";
@@ -116,7 +116,7 @@ in
 
         metasrht-api = import ./service.nix { inherit config pkgs lib; } scfg drv iniKey {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "meta.sr.ht api service";
@@ -143,7 +143,7 @@ in
 
         metasrht-webhooks = {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "meta.sr.ht webhooks service";
@@ -200,11 +200,16 @@ in
       "meta.sr.ht::billing".stripe-secret-key = mkDefault null;
     };
 
-    services.nginx.virtualHosts."meta.${cfg.originBase}" = {
-      forceSSL = true;
-      locations."/".proxyPass = "http://${cfg.address}:${toString port}";
-      locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
-      locations."/static".root = "${pkgs.sourcehut.metasrht}/${pkgs.sourcehut.python.sitePackages}/metasrht";
+    services.nginx.virtualHosts = with builtins; let
+      address = elemAt (builtins.split "://" cfg.settings."meta.sr.ht".origin) 2;
+    in
+    {
+      "${address}" = {
+        forceSSL = true;
+        locations."/".proxyPass = "http://${cfg.address}:${toString port}";
+        locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
+        locations."/static".root = "${pkgs.sourcehut.metasrht}/${pkgs.sourcehut.python.sitePackages}/metasrht";
+      };
     };
   };
 }

@@ -7,7 +7,7 @@ let
   settingsFormat = pkgs.formats.ini { };
 
   # Specialized python containing all the modules
-  python = pkgs.sourcehut.python.withPackages (ps: with ps; [
+  defaultPython = pkgs.sourcehut.python.withPackages (ps: with ps; [
     gunicorn
     # Sourcehut services
     buildsrht
@@ -44,7 +44,7 @@ in
           * disabling nginx
           * adjusting the relevant settings for server addresses and ports directly
 
-        Further details about this can be found in the `Sourcehut`-section of the NixOS-manual.
+        Further details about this can be found in the `Sourcehut` section of the NixOS manual.
       '')
     ];
 
@@ -86,7 +86,7 @@ in
     python = mkOption {
       internal = true;
       type = types.package;
-      default = python;
+      default = defaultPython;
       description = ''
         The python package to use. It should contain references to the *srht modules and also
         gunicorn.
@@ -116,8 +116,8 @@ in
     assertions =
       [
         {
-          assertion = with cfgIni."sr.ht"; secret-key != null && stringLength secret-key == 32;
-          message = "sr.ht's secret key must be defined and of a 32 byte length.";
+          assertion = with cfgIni."sr.ht"; service-key != null && stringLength service-key == 64;
+          message = "sr.ht's service key must be defined and of a 64 byte length.";
         }
 
         # Is it always 44 characters...? At least from the times I've generated one...
@@ -167,7 +167,7 @@ in
       # The source code for your fork of sr.ht
       "sr.ht".source-url = mkDefault "https://git.sr.ht/~sircmpwn/srht";
       # A secret key to encrypt session cookies with
-      "sr.ht".secret-key = mkDefault null;
+      "sr.ht".service-key = mkDefault null;
       "sr.ht".global-domain = mkDefault null;
 
       # Outgoing SMTP settings

@@ -112,7 +112,9 @@ in
     systemd = {
       tmpfiles.rules = [
         # /var/log is owned by root
-        "f /var/log/git-srht-shell 0644 ${user} ${user} -"
+        "f /var/log/gitsrht-shell 0644 ${user} ${user} -"
+        "f /var/log/gitsrht-update-hook 0644 ${user} ${user} -"
+        "f /var/log/gitsrht-dispatch 0644 ${user} ${user} -"
 
         "d ${statePath} 0750 ${user} ${user} -"
         "d ${cfg.settings."${iniKey}".repos} 2755 ${user} ${user} -"
@@ -121,11 +123,11 @@ in
       services = {
         gitsrht = import ./service.nix { inherit config pkgs lib; } scfg drv iniKey {
           after = [ "redis.service" "postgresql.service" "network.target" ];
-          requires = [ "redis.service" "postgresql.service" ];
+          bindsTo = [ "redis.service" "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           # Needs internally to create repos at the very least
-          path = [ pkgs.git ];
+          path = [ pkgs.git pkgs.gzip ];
           description = "git.sr.ht website service";
 
           serviceConfig.ExecStart = "${cfg.python}/bin/gunicorn ${drv.pname}.app:app -b ${cfg.address}:${toString port}";
@@ -133,7 +135,7 @@ in
 
         gitsrht-webhooks = {
           after = [ "postgresql.service" "network.target" ];
-          requires = [ "postgresql.service" ];
+          bindsTo = [ "postgresql.service" ];
           wantedBy = [ "multi-user.target" ];
 
           description = "git.sr.ht webhooks service";
@@ -150,7 +152,7 @@ in
 
     services.sourcehut.settings = {
       # URL git.sr.ht is being served at (protocol://domain)
-      "git.sr.ht".origin = mkDefault "http://git.sr.ht.local";
+      "git.sr.ht".origin = mkDefault "http://git.${cfg.originBase}";
       # Address and port to bind the debug server to
       "git.sr.ht".debug-host = mkDefault "0.0.0.0";
       "git.sr.ht".debug-port = mkDefault port;
@@ -171,7 +173,7 @@ in
       # Path to git repositories on disk
       "git.sr.ht".repos = mkDefault "/var/lib/git";
 
-      "git.sr.ht".outgoing-domain = mkDefault "http://git.sr.ht.local";
+      "git.sr.ht".outgoing-domain = mkDefault "http://git.${cfg.originBase}";
 
       # The authorized keys hook uses this to dispatch to various handlers
       # The format is a program to exec into as the key, and the user to match as the
@@ -186,31 +188,35 @@ in
       "git.sr.ht::dispatch".${builtins.unsafeDiscardStringContext "${pkgs.sourcehut.buildsrht}/bin/buildsrht-keys"} = mkDefault "buildsrht:buildsrht";
     };
 
-    services.nginx.virtualHosts."git.${cfg.originBase}" = {
-      forceSSL = true;
-      locations."/".proxyPass = "http://${cfg.address}:${toString port}";
-      locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
-      locations."/static".root = "${pkgs.sourcehut.gitsrht}/${pkgs.sourcehut.python.sitePackages}/gitsrht";
-      extraConfig = ''
-            location = /authorize {
-            proxy_pass http://${cfg.address}:${toString port};
-            proxy_pass_request_body off;
-            proxy_set_header Content-Length "";
-            proxy_set_header X-Original-URI $request_uri;
-        }
-            location ~ ^/([^/]+)/([^/]+)/(HEAD|info/refs|objects/info/.*|git-upload-pack).*$ {
-                auth_request /authorize;
-                root /var/lib/git;
-                fastcgi_pass unix:/run/fcgiwrap.sock;
-                fastcgi_param SCRIPT_FILENAME ${pkgs.git}/bin/git-http-backend;
-                fastcgi_param PATH_INFO $uri;
-                fastcgi_param GIT_PROJECT_ROOT $document_root;
-                fastcgi_read_timeout 500s;
-                include ${pkgs.nginx}/conf/fastcgi_params;
-                gzip off;
-            }
-      '';
-
+    services.nginx.virtualHosts = with builtins; let
+      address = elemAt (builtins.split "://" cfg.settings."git.sr.ht".origin) 2;
+    in
+    {
+      "${address}" = {
+        forceSSL = true;
+        locations."/".proxyPass = "http://${cfg.address}:${toString port}";
+        locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
+        locations."/static".root = "${pkgs.sourcehut.gitsrht}/${pkgs.sourcehut.python.sitePackages}/gitsrht";
+        extraConfig = ''
+              location = /authorize {
+              proxy_pass http://${cfg.address}:${toString port};
+              proxy_pass_request_body off;
+              proxy_set_header Content-Length "";
+              proxy_set_header X-Original-URI $request_uri;
+          }
+              location ~ ^/([^/]+)/([^/]+)/(HEAD|info/refs|objects/info/.*|git-upload-pack).*$ {
+                  auth_request /authorize;
+                  root ${cfg.settings."git.sr.ht".repos};
+                  fastcgi_pass unix:/run/fcgiwrap.sock;
+                  fastcgi_param SCRIPT_FILENAME ${pkgs.git}/bin/git-http-backend;
+                  fastcgi_param PATH_INFO $uri;
+                  fastcgi_param GIT_PROJECT_ROOT $document_root;
+                  fastcgi_read_timeout 500s;
+                  include ${pkgs.nginx}/conf/fastcgi_params;
+                  gzip off;
+              }
+        '';
+      };
     };
   };
 }

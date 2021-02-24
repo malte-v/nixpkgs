@@ -86,7 +86,7 @@ in
 
       services.mansrht = import ./service.nix { inherit config pkgs lib; } scfg drv iniKey {
         after = [ "postgresql.service" "network.target" ];
-        requires = [ "postgresql.service" ];
+        bindsTo = [ "postgresql.service" ];
         wantedBy = [ "multi-user.target" ];
 
         description = "man.sr.ht website service";
@@ -111,11 +111,16 @@ in
       "man.sr.ht".oauth-client-secret = mkDefault null;
     };
 
-    services.nginx.virtualHosts."man.${cfg.originBase}" = {
-      forceSSL = true;
-      locations."/".proxyPass = "http://${cfg.address}:${toString port}";
-      locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
-      locations."/static".root = "${pkgs.sourcehut.mansrht}/${pkgs.sourcehut.python.sitePackages}/mansrht";
+    services.nginx.virtualHosts = with builtins; let
+      address = elemAt (builtins.split "://" cfg.settings."man.sr.ht".origin) 2;
+    in
+    {
+      "${address}" = {
+        forceSSL = true;
+        locations."/".proxyPass = "http://${cfg.address}:${toString port}";
+        locations."/query".proxyPass = "http://${cfg.address}:${toString (port + 100)}";
+        locations."/static".root = "${pkgs.sourcehut.mansrht}/${pkgs.sourcehut.python.sitePackages}/mansrht";
+      };
     };
   };
 }

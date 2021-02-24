@@ -1,4 +1,4 @@
-{ python38
+{ python3
 , openssl
 , callPackage
 , recurseIntoAttrs
@@ -10,7 +10,7 @@
 let
   fetchNodeModules = callPackage ./fetchNodeModules.nix { };
 
-  python = python38.override {
+  python = python3.override {
     packageOverrides = self: super: {
       srht = self.callPackage ./core.nix { inherit fetchNodeModules; };
 
