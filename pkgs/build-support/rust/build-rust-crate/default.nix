@@ -152,6 +152,10 @@ in
    # Including multiple versions of a crate is very popular during
    # ecosystem transitions, e.g. from futures 0.1 to futures 0.3.
    , crateRenames
+   # Override the --target flag passed to rustc. If you want to cross-compile, do
+   # *not* use this option; see https://github.com/NixOS/nixpkgs/blob/e0e4484f2c028d2269f5ebad0660a51bbe46caa4/doc/languages-frameworks/rust.section.md#cross-compilation
+   # instead. A valid use case is compiling to WebAssembly (wasm32-unknown-unknown).
+   , targetOverride
    # A list of extra options to pass to rustc.
    #
    # Example: [ "-Z debuginfo=2" ]
@@ -288,7 +292,7 @@ stdenv.mkDerivation (rec {
       inherit crateName dependencies
               crateFeatures crateRenames libName release libPath crateType
               metadata hasCrateBin crateBin verbose colors
-              extraRustcOpts buildTests;
+              targetOverride extraRustcOpts buildTests;
     };
     installPhase = installCrate crateName metadata buildTests;
 
@@ -302,6 +306,7 @@ stdenv.mkDerivation (rec {
   rust = rustc;
   release = crate_.release or true;
   verbose = crate_.verbose or true;
+  targetOverride = null;
   extraRustcOpts = [];
   features = [];
   nativeBuildInputs = [];
