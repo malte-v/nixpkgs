@@ -1,24 +1,46 @@
-{ lib, fetchgit, fetchNodeModules, buildPythonPackage
-, pgpy, flask, bleach, humanize, html5lib, markdown, psycopg2, pygments
-, requests, sqlalchemy, cryptography, beautifulsoup4, sqlalchemy-utils, prometheus_client
-, celery, alembic, importlib-metadata, mistletoe
-, sassc, nodejs
-, writeText }:
+{ lib
+, fetchgit
+, fetchNodeModules
+, buildPythonPackage
+, pgpy
+, flask
+, bleach
+, misaka
+, humanize
+, html5lib
+, markdown
+, psycopg2
+, pygments
+, requests
+, sqlalchemy
+, cryptography
+, beautifulsoup4
+, sqlalchemy-utils
+, prometheus_client
+, celery
+, alembic
+, importlib-metadata
+, mistletoe
+, minio
+, sassc
+, nodejs
+, writeText
+}:
 
 buildPythonPackage rec {
   pname = "srht";
-  version = "0.65.2";
+  version = "0.67.0";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/core.sr.ht";
     rev = version;
-    sha256 = "1jfp1vc8mink3c7ccacgnqx8hpkck82ipxiql38q1y9l8xcsah03";
+    sha256 = "sha256-dS3Vjkdku2o2UX7R2AIOndLGNHCbkTkz2Zpxb0NXhDo=";
   };
 
   node_modules = fetchNodeModules {
     src = "${src}/srht";
     nodejs = nodejs;
-    sha256 = "0gwa2xb75g7fclrsr7r131kj8ri5gmhd96yw1iws5pmgsn2rlqi1";
+    sha256 = "sha256-IWKahdWv3qJ5DNyb1GB9JWYkZxghn6wzZe68clYXij8=";
   };
 
   patches = [
@@ -34,6 +56,7 @@ buildPythonPackage rec {
     pgpy
     flask
     bleach
+    misaka
     humanize
     html5lib
     markdown
@@ -51,6 +74,7 @@ buildPythonPackage rec {
     celery
     alembic
     importlib-metadata
+    minio
   ];
 
   PKGVER = version;

@@ -1,14 +1,19 @@
-{ lib, fetchgit, buildPythonPackage
-, srht, pygit2 }:
+{ lib
+, fetchgit
+, buildPythonPackage
+, srht
+, pygit2
+, python
+}:
 
 buildPythonPackage rec {
   pname = "mansrht";
-  version = "0.15.4";
+  version = "0.15.12";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/man.sr.ht";
     rev = version;
-    sha256 = "0spi0yy2myxw4kggy54yskda14c4vaq2ng9dd9krqsajnsy7anrw";
+    sha256 = "sha256-MqH/8K9XRvEg6P7GHE6XXtWnhDP3wT8iGoNaFtYQbio=";
   };
 
   nativeBuildInputs = srht.nativeBuildInputs;
@@ -20,9 +25,8 @@ buildPythonPackage rec {
 
   preBuild = ''
     export PKGVER=${version}
+    export SRHT_PATH=${srht}/${python.sitePackages}/srht
   '';
-
-  dontUseSetuptoolsCheck = true;
 
   meta = with lib; {
     homepage = "https://git.sr.ht/~sircmpwn/man.sr.ht";
