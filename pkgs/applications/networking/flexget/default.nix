@@ -55,6 +55,7 @@ python3Packages.buildPythonApplication rec {
     terminaltables
     zxcvbn
     # plugins
+    deluge-client
     transmission-rpc
   ];
 
