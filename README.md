@@ -10,11 +10,11 @@
 [Nixpkgs](https://github.com/nixos/nixpkgs) is a collection of over
 60,000 software packages that can be installed with the
 [Nix](https://nixos.org/nix/) package manager. It also implements
-[NixOS](https://nixos.org/nixos/), a purely-functional Linux distribution.
+[NixOS](https://nixos.org/nixos/), a purely-functional GNU/Linux distribution.
 
 # Manuals
 
-* [NixOS Manual](https://nixos.org/nixos/manual) - how to install, configure, and maintain a purely-functional Linux distribution
+* [NixOS Manual](https://nixos.org/nixos/manual) - how to install, configure, and maintain a purely-functional GNU/Linux distribution
 * [Nixpkgs Manual](https://nixos.org/nixpkgs/manual/) - contributing to Nixpkgs and using programming-language-specific Nix expressions
 * [Nix Package Manager Manual](https://nixos.org/nix/manual) - how to write Nix expressions (programs), and how to use Nix command line tools
 
