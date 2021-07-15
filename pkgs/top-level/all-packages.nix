@@ -31771,6 +31771,8 @@ in
 
   websocketd = callPackage ../applications/networking/websocketd { };
 
+  wendzelnntpd = callPackage ../applications/networking/wendzelnntpd { };
+
   wikicurses = callPackage ../applications/misc/wikicurses {
     pythonPackages = python3Packages;
   };
