@@ -366,7 +366,7 @@ stdenv.mkDerivation {
   #dontAddPrefix = true;
 
   mesonFlags = [
-    # "-Dversion-tag=${version}" FIXME: add this on the next rebuild
+    "-Dversion-tag=${version}"
     "-Ddbuspolicydir=${placeholder "out"}/share/dbus-1/system.d"
     "-Ddbussessionservicedir=${placeholder "out"}/share/dbus-1/services"
     "-Ddbussystemservicedir=${placeholder "out"}/share/dbus-1/system-services"
