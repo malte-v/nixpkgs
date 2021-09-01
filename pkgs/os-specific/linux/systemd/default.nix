@@ -130,10 +130,10 @@ stdenv.mkDerivation {
   # We use systemd/systemd-stable for src, and ship NixOS-specific patches inside nixpkgs directly
   # This has proven to be less error-prone than the previous systemd fork.
   src = fetchFromGitHub {
-    owner = "systemd";
-    repo = "systemd-stable";
-    rev = "v${version}";
-    sha256 = "0pqi9gbk9kgwvd0idf13ybxz7s4h5przn01bwj6fna44jr0wy41c";
+    owner = "codepeon";
+    repo = "systemd";
+    rev = "7dc353a37d268cccaeb613f950cb65b4674ade65";
+    sha256 = "sha256-W5vybn+pL2i5DzHHPIyikHoZhTnh+zs696a6fA9BHzE=";
   };
 
   # If these need to be regenerated, `git am path/to/00*.patch` them into a
