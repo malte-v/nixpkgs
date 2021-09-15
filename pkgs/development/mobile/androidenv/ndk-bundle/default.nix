@@ -59,5 +59,6 @@ deployAndroidPackage {
         ln -sf ../libexec/android-sdk/ndk-bundle/$progname $out/bin/$progname
     done
   '');
+  patches = [ ./termux-patches/bits-struct_file.h.patch ];
   noAuditTmpdir = true; # Audit script gets invoked by the build/ component in the path for the make standalone script
 }
