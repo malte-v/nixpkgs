@@ -22,10 +22,12 @@ let
       listssrht = self.callPackage ./lists.nix { };
       mansrht = self.callPackage ./man.nix { };
       metasrht = self.callPackage ./meta.nix { };
+      pagessrht = self.callPackage ./pages.nix { };
       pastesrht = self.callPackage ./paste.nix { };
       todosrht = self.callPackage ./todo.nix { };
 
       scmsrht = self.callPackage ./scm.nix { };
+      srht-keys = self.scmsrht.srht-keys;
     };
   };
 in
@@ -40,6 +42,8 @@ with python.pkgs; recurseIntoAttrs {
   listssrht = toPythonApplication listssrht;
   mansrht = toPythonApplication mansrht;
   metasrht = toPythonApplication metasrht;
+  pagessrht = pagessrht;
   pastesrht = toPythonApplication pastesrht;
   todosrht = toPythonApplication todosrht;
+  srht-keys = scmsrht.srht-keys;
 }

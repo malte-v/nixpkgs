@@ -25,17 +25,16 @@
 , sassc
 , nodejs
 , redis
-, writeText
 }:
 
 buildPythonPackage rec {
   pname = "srht";
-  version = "0.67.4";
+  version = "0.67.25";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/core.sr.ht";
     rev = version;
-    sha256 = "sha256-XvzFfcBK5Mq8p7xEBAF/eupUE1kkUBh5k+ByM/WA9bc=";
+    sha256 = "sha256-JZXIpNEY1/KUaYh0Vk5j/zVO9JQc2F1RmnZ/5TFN0PI=";
     fetchSubmodules = true;
   };
 
@@ -46,7 +45,10 @@ buildPythonPackage rec {
   };
 
   patches = [
-    ./disable-npm-install.patch
+    # Disable check for npm
+    patches/disable-npm-install.patch
+    # Add Unix socket support for redis-host=
+    patches/redis-socket/core/v3-0001-add-Unix-socket-support-for-redis-host.patch
   ];
 
   nativeBuildInputs = [
@@ -87,6 +89,7 @@ buildPythonPackage rec {
   '';
 
   dontUseSetuptoolsCheck = true;
+  pythonImportsCheck = [ "srht" ];
 
   meta = with lib; {
     homepage = "https://git.sr.ht/~sircmpwn/srht";
