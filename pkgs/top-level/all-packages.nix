@@ -34735,6 +34735,8 @@ with pkgs;
 
   tvheadend = callPackage ../servers/tvheadend { };
 
+  uacme = callPackage ../tools/admin/uacme { };
+
   ums = callPackage ../servers/ums { };
 
   unity3d = callPackage ../development/tools/unity3d {
