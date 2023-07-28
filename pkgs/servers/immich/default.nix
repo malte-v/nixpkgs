@@ -189,6 +189,7 @@ buildNpmPackage' {
   '';
 
   passthru = {
+    tests = { inherit (nixosTests) immich; };
     inherit cli web machine-learning;
     updateScript = ./update.sh;
   };
