@@ -78,41 +78,6 @@ let
     '';
   };
 
-  # XXX: remove once PR is merged in nixpkgs
-  insightface = python.pkgs.buildPythonPackage rec {
-    pname = "insightface";
-    version = "0.7.3";
-    src = fetchPypi {
-      inherit pname version;
-      hash = "sha256-8ZH3GWEuuzcBj0GTaBRQBUTND4bm/NZ2wCPzVMZo3fc=";
-    };
-
-    nativeBuildInputs = with python.pkgs; [
-      cython
-      numpy
-      setuptools
-    ];
-
-    propagatedBuildInputs = with python.pkgs; [
-      easydict
-      matplotlib
-      mxnet
-      numpy
-      onnx
-      onnxruntime
-      opencv4
-      scikit-learn
-      scikit-image
-      tensorboard
-      tqdm
-      albumentations
-      prettytable
-    ];
-
-    # TODO more granuraly disable those that need a GPU
-    doCheck = false;
-  };
-
   machine-learning = python.pkgs.buildPythonApplication {
     pname = "immich-machine-learning";
     inherit version;
