@@ -1902,8 +1902,6 @@ with pkgs;
 
   hyperpotamus = callPackage ../tools/misc/hyperpotamus { };
 
-  immich-cli = callPackage ../tools/misc/immich-cli { };
-
   inherit (callPackages ../tools/networking/ivpn/default.nix {}) ivpn ivpn-service;
 
   jobber = callPackage ../tools/system/jobber { };
@@ -25883,6 +25881,12 @@ with pkgs;
   exhaustive = callPackage ../development/tools/exhaustive { };
 
   hyp = callPackage ../servers/http/hyp { };
+
+  immich = callPackage ../servers/immich {
+    nodejs = nodejs_18;
+    python = python311;
+  };
+  immich-cli = immich.cli;
 
   peering-manager = callPackage ../servers/web-apps/peering-manager { };
 
