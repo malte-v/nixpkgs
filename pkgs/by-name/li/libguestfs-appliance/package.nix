@@ -1,23 +1,28 @@
-{
-  lib,
-  stdenvNoCC,
-  fetchurl,
+{ lib
+, stdenvNoCC
+, vmTools
 }:
 
-stdenvNoCC.mkDerivation rec {
+vmTools.runInLinuxImage (stdenvNoCC.mkDerivation {
   pname = "libguestfs-appliance";
-  version = "1.54.0";
+  version = "unknown";
 
-  src = fetchurl {
-    url = "http://download.libguestfs.org/binaries/appliance/appliance-${version}.tar.xz";
-    hash = "sha256-D7f4Cnjx+OmLfqQWmauyXZiSjayG9TCmxftj0iOPFso=";
-  };
+  diskImage = vmTools.diskImageExtraFuns.debian12aarch64 [
+    "libguestfs-tools"
+    "linux-image-arm64" # required by supermin
+  ];
+  diskImageFormat = "qcow2";
+  memSize = "2048"; # we need to be generous here
+
+  unpackPhase = "true";
 
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out
-    cp README.fixed initrd kernel root $out
+    LIBGUESTFS_DEBUG=1 libguestfs-make-fixed-appliance $out || true
+    cp /tmp/.guestfs-0/appliance.d/* $out
+    chmod +x $out/kernel
+    touch $out/README.fixed
 
     runHook postInstall
   '';
@@ -25,15 +30,8 @@ stdenvNoCC.mkDerivation rec {
   meta = with lib; {
     description = "VM appliance disk image used in libguestfs package";
     homepage = "https://libguestfs.org";
-    license = with licenses; [
-      gpl2Plus
-      lgpl2Plus
-    ];
-    maintainers = with maintainers; [ lukts30 ];
-    platforms = [
-      "i686-linux"
-      "x86_64-linux"
-    ];
+    license = with licenses; [ gpl2Plus lgpl2Plus ];
+    platforms = [ "aarch64-linux" ]; # TODO
     hydraPlatforms = [ ]; # Hydra fails with "Output limit exceeded"
   };
-}
+})
