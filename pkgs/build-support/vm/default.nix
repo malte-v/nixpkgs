@@ -1076,6 +1076,17 @@ rec {
       urlPrefix = "https://snapshot.debian.org/archive/debian/20231124T031419Z";
       packages = commonDebianPackages;
     };
+
+    debian12aarch64 = {
+      name = "debian-12.2-bookworm-arm64";
+      fullName = "Debian 12.2 Bookworm (arm64)";
+      packagesList = fetchurl {
+        url = "https://snapshot.debian.org/archive/debian/20231124T031419Z/dists/bookworm/main/binary-arm64/Packages.xz";
+        hash = "sha256-0BVipzH8qTyKJYsENGU4xOTXqTgPBbksB7SRFqYUpEY=";
+      };
+      urlPrefix = "https://snapshot.debian.org/archive/debian/20231124T031419Z";
+      packages = commonDebianPackages;
+    };
   };
 
 

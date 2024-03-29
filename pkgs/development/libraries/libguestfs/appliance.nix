@@ -1,22 +1,28 @@
 { lib
 , stdenvNoCC
-, fetchurl
+, vmTools
 }:
 
-stdenvNoCC.mkDerivation rec {
+vmTools.runInLinuxImage (stdenvNoCC.mkDerivation {
   pname = "libguestfs-appliance";
-  version = "1.46.0";
+  version = "1.48.6";
 
-  src = fetchurl {
-    url = "http://download.libguestfs.org/binaries/appliance/appliance-${version}.tar.xz";
-    hash = "sha256-p1UN5wv3y+V5dFMG5yM3bVf1vaoDzQnVv9apfwC4gNg=";
-  };
+  diskImage = vmTools.diskImageExtraFuns.debian12aarch64 [
+    "libguestfs-tools"
+    "linux-image-arm64" # required by supermin
+  ];
+  diskImageFormat = "qcow2";
+  memSize = "2048"; # we need to be generous here
+
+  unpackPhase = "true";
 
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out
-    cp README.fixed initrd kernel root $out
+    LIBGUESTFS_DEBUG=1 libguestfs-make-fixed-appliance $out || true
+    cp /tmp/.guestfs-0/appliance.d/* $out
+    chmod +x $out/kernel
+    touch $out/README.fixed
 
     runHook postInstall
   '';
@@ -25,7 +31,7 @@ stdenvNoCC.mkDerivation rec {
     description = "VM appliance disk image used in libguestfs package";
     homepage = "https://libguestfs.org";
     license = with licenses; [ gpl2Plus lgpl2Plus ];
-    platforms = [ "i686-linux" "x86_64-linux" ];
+    platforms = [ "aarch64-linux" ]; # TODO
     hydraPlatforms = [ ]; # Hydra fails with "Output limit exceeded"
   };
-}
+})
