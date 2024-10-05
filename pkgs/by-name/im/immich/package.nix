@@ -175,6 +175,9 @@ buildNpmPackage' {
 
     rm -r node_modules
 
+    # otherwise sharp detects musl libc on the alpine raspi and complains
+    sed -i 's/runtimePlatformArch()/"linux-arm64"/g' lib/sharp.js
+
     cd ../..
     rm -r node_modules/@img/sharp*
   '';
