@@ -1,6 +1,7 @@
 { lib
 , python3Packages
 , fetchPypi
+, nixosTests
 }:
 
 python3Packages.buildPythonApplication rec {
@@ -61,6 +62,10 @@ python3Packages.buildPythonApplication rec {
     # is read-only.
     python3 $out/${python3Packages.python.sitePackages}/app/__init__.py
   '';
+
+  passthru.tests = {
+    inherit (nixosTests) whoogle-search;
+  };
 
   meta = with lib; {
     homepage = "https://github.com/benbusby/whoogle-search";
